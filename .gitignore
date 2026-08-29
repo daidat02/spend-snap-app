@@ -16,3 +16,6 @@ coverage.out
 
 # OS / editor
 .DS_Store
+
+# opencode
+.opencode/

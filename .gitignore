@@ -7,6 +7,8 @@
 bin/
 dist/
 server/server
+tmp/
+server/tmp/
 
 # Go
 *.test

@@ -10,6 +10,7 @@ type Config struct{
 	App AppConfig
 	Database DatabaseConfig
 	JWT JWTConfig
+	R2 R2Config
 }
 
 type AppConfig struct{
@@ -32,6 +33,14 @@ type JWTConfig struct{
 	RefreshTokenExpire time.Duration `mapstructure:"REFRESH_TOKEN_EXPIRE"`
 }
 
+type R2Config struct {
+	AccountID       string `mapstructure:"R2_ACCOUNT_ID"`
+	AccessKeyID     string `mapstructure:"R2_ACCESS_KEY_ID"`
+	SecretAccessKey string `mapstructure:"R2_ACCESS_KEY_SECRET"`
+	BucketName      string `mapstructure:"R2_BUCKET_NAME"`
+	PublicURL       string `mapstructure:"R2_PUBLIC_URL"`
+}
+
 // LoadConfig khởi tạo cấu hình từ các biến môi trường
 
 func LoadConfig()(*Config, error){
@@ -51,9 +60,11 @@ func LoadConfig()(*Config, error){
 	if err := viper.Unmarshal(&config.Database); err != nil{
 		return nil, err
 	}
-	
 
 	if err := viper.Unmarshal(&config.JWT); err != nil{
+		return nil, err
+	}
+	if err := viper.Unmarshal(&config.R2); err != nil{
 		return nil, err
 	}
 	return &config, nil

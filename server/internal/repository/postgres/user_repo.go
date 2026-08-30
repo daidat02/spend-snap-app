@@ -29,9 +29,11 @@ func(repo *PostgresUserRepository)Create(ctx context.Context,user *userdomain.Us
 		ctx,
 		queryCreateUser,
 		user.Id,
-		user.Username,
 		user.Email,
 		user.Password,
+		user.Username,
+		user.Firstname,
+		user.Lastname,
 		user.PhoneNumber,
 		user.Status,
 	)
@@ -48,9 +50,14 @@ func (repo *PostgresUserRepository) FindByEmail(ctx context.Context, email strin
 	u := &userdomain.User{}
 	err := repo.db.QueryRow(ctx, queryGetByEmail, email).Scan(
 		&u.Id,
-		&u.Username,
 		&u.Email,
+		&u.Firstname,
+		&u.Lastname,
 		&u.Password, // Nhận về chuỗi password_hash đã lưu trong DB
+		&u.Username,
+		&u.AvatarURL,
+		&u.PhoneNumber,
+		&u.Bio,
 		&u.Status,
 		&u.CreatedAt,
 	)

@@ -25,7 +25,6 @@ func (uc *CreateUserUsecase) RegisterAccount(ctx context.Context, user *userdoma
 	
 	// Khởi tạo các giá trị mặc định bắt buộc trước khi Validate
 	user.Status = userdomain.StatusActive
-	user.CreatedAt = time.Now()
 	
 	// Validate kiểm tra tính hợp lệ của thực thể người dùng
 	if err := user.Validate();err != nil{
@@ -39,6 +38,11 @@ func (uc *CreateUserUsecase) RegisterAccount(ctx context.Context, user *userdoma
 		return nil, err
 	}
 	user.Password = hashPassword
+
+	if user.Id == "" {
+		user.Id = utils.NewID()
+	}
+
 	userCreated, err := uc.userRepo.Create(ctx, user)
 	if err != nil {
 		log.Println("lỗi khi tạo người dùng:", err)
@@ -46,13 +50,13 @@ func (uc *CreateUserUsecase) RegisterAccount(ctx context.Context, user *userdoma
 	}
 
 	response := &userdomain.UserResponse{
-		Id: userCreated.Id,
-		Username: userCreated.Username,
-		Email: userCreated.Email,
-		AvatarURL: userCreated.AvatarURL,
+		Id:          userCreated.Id,
+		Firstname:   userCreated.Firstname,
+		Lastname:    userCreated.Lastname,
+		Email:       userCreated.Email,
+		Username:    userCreated.Username,
 		PhoneNumber: userCreated.PhoneNumber,
-		Status: userCreated.Status,
-		CreatedAt: userCreated.CreatedAt,
+		Status:      userCreated.Status,
 	}
 	return response, nil
 }
@@ -95,10 +99,13 @@ func (uc *CreateUserUsecase) Login(ctx context.Context, req *userdomain.LoginReq
 
     response := &userdomain.UserResponse{
         Id:          userFound.Id,
-        Username:    userFound.Username,
+        Firstname:   userFound.Firstname,
+        Lastname:    userFound.Lastname,
         Email:       userFound.Email,
+		Username:    userFound.Username,
         AvatarURL:   userFound.AvatarURL,
         PhoneNumber: userFound.PhoneNumber,
+        Bio:         userFound.Bio,
         Status:      userFound.Status,
         CreatedAt:   userFound.CreatedAt,
     }

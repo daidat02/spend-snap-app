@@ -7,12 +7,14 @@ import (
 	"time"
 )
 type CreateUserRequest struct {
-	Id string `json:"id"`
-	Username string `json:"username"`
 	Email string `json:"email"`
 	Password string `json:"password"`
+    Username string `json:"user_name"`
+	Firstname string `json:"first_name"`
+	Lastname string `json:"last_name"`
 	AvatarURL string `json:"avatar_url"`
 	PhoneNumber string `json:"phone_number"`
+	Bio string `json:"bio"`
 	Status string `json:"status"`
 }
 
@@ -22,12 +24,14 @@ type LoginRequest struct {
 }
 
 type UserResponse struct {
-    // Tên trường trong Go (Viết hoa) | Tag chỉ định key JSON (Viết thường)
     Id          string `json:"id"`
-    Username    string `json:"username"`
     Email       string `json:"email"`
-    AvatarURL   string `json:"avatar_url,omitempty"`   // Nếu rỗng thì ẩn
-    PhoneNumber string `json:"phone_number,omitempty"` // Nếu rỗng thì ẩn
+    Username    string `json:"user_name"` // Nếu rỗng thì ẩn
+    Firstname   string `json:"first_name,omitempty"`
+    Lastname    string `json:"last_name,omitempty"`
+    AvatarURL   *string `json:"avatar_url,omitempty"`   // Nếu rỗng thì ẩn
+    PhoneNumber *string `json:"phone_number,omitempty"` // Nếu rỗng thì ẩn
+    Bio         *string `json:"bio,omitempty"`
     Status      string `json:"status"`
     CreatedAt   time.Time `json:"created_at"`
 }

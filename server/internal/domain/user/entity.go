@@ -14,13 +14,18 @@ const (
 // thực thể người dùng
 type User struct{
 	Id string
-	Username string
 	Email string
 	Password string
-	AvatarURL string
-	PhoneNumber string
+	Username string
+	Firstname string
+	Lastname string
+	AvatarURL *string
+	PhoneNumber *string
+	Bio *string
 	Status string
 	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time
 }
 
 
@@ -30,8 +35,11 @@ func (user *User) Validate() error {
 	if user.Email == "" {
 		return errors.New("Lỗi: Email không được để trống")
 	}
-	if user.Username == "" {
-		return errors.New("Lỗi: Tên người dùng không được để trống")
+	if user.Firstname == "" {
+		return errors.New("Lỗi: Tên không được để trống")
+	}
+	if user.Lastname == "" {
+		return errors.New("Lỗi: Họ không được để trống")
 	}
 	if user.Password == "" {
 		return errors.New("Lỗi: Mật khẩu không được để trống")

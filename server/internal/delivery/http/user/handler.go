@@ -33,11 +33,12 @@ func (h *UserHandler) RegisterAccount(c *gin.Context){
 	}
 
 	user := &userdomain.User{
-		Id: req.Id,
-		Username: req.Username,
-		Email: req.Email,
-		Password: req.Password,
-		Status: req.Status,
+		Firstname:   req.Firstname,
+		Lastname:    req.Lastname,
+		Email:       req.Email,
+		Password:    req.Password,
+		Username:    req.Username,
+		Status:      req.Status,
 	}
 
 	userCreated, err := h.usecase.RegisterAccount(c.Request.Context(), user)

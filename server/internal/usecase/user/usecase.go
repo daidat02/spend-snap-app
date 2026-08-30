@@ -39,8 +39,8 @@ func (uc *CreateUserUsecase) RegisterAccount(ctx context.Context, user *userdoma
 	}
 	user.Password = hashPassword
 
-	if user.Id == "" {
-		user.Id = utils.NewID()
+	if user.ID == "" {
+		user.ID = utils.NewID()
 	}
 
 	userCreated, err := uc.userRepo.Create(ctx, user)
@@ -50,7 +50,7 @@ func (uc *CreateUserUsecase) RegisterAccount(ctx context.Context, user *userdoma
 	}
 
 	response := &userdomain.UserResponse{
-		Id:          userCreated.Id,
+		ID:          userCreated.ID,
 		Firstname:   userCreated.Firstname,
 		Lastname:    userCreated.Lastname,
 		Email:       userCreated.Email,
@@ -91,14 +91,14 @@ func (uc *CreateUserUsecase) Login(ctx context.Context, req *userdomain.LoginReq
 		log.Println("Mật khẩu không chính xác cho email:", req.Email)
 		return nil, "", errors.New("email hoặc mật khẩu không chính xác")
 	}
-	accessToken, err := utils.GenerateToken(userFound.Id, userFound.Email)
+	accessToken, err := utils.GenerateToken(userFound.ID, userFound.Email)
 	if err != nil {
 		log.Println("lỗi khi tạo token:", err)
 		return nil, "", err
 	}
 
     response := &userdomain.UserResponse{
-        Id:          userFound.Id,
+        ID:          userFound.ID,
         Firstname:   userFound.Firstname,
         Lastname:    userFound.Lastname,
         Email:       userFound.Email,

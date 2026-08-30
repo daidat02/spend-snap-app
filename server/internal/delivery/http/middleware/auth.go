@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func AuthMiddleware() gin.HandlerFunc {
+func VerifyToken() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 1. Lấy chuỗi Authorization từ Header
 		authHeader := c.GetHeader("Authorization")
@@ -50,3 +50,6 @@ func AuthMiddleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+// VertifyToken giữ backward-compat với code cũ (sai chính tả)
+func VertifyToken() gin.HandlerFunc { return VerifyToken() }

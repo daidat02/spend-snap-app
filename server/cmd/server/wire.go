@@ -5,13 +5,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	// Khai báo alias gọn gàng, không trùng lặp
 	"spendsnap-backend/internal/config"
+	postHttp "spendsnap-backend/internal/delivery/http/post"
+	"spendsnap-backend/internal/delivery/http/transaction"
 	uploadHttp "spendsnap-backend/internal/delivery/http/upload"
 	userHttp "spendsnap-backend/internal/delivery/http/user"
-	userRepo "spendsnap-backend/internal/repository/postgres"
-	uploadUsecase "spendsnap-backend/internal/usecase/upload"
-	userUsecase "spendsnap-backend/internal/usecase/user"
 	r2storage "spendsnap-backend/pkg/storage"
 )
 
@@ -32,25 +30,24 @@ func newRouter(cfg *config.Config, dbPool *pgxpool.Pool) *gin.Engine {
 	}));
 
 	r.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{"status": "ok"}) // Bỏ dấu chấm phẩy
+		c.JSON(200, gin.H{"status": "ok"}) 
 	})
 
-	// Khởi tạo các dependency với tên biến ngắn gọn, tránh trùng lặp alias
-	repo := userRepo.NewPostgresUserRepository(dbPool)
-	uc := userUsecase.NewCreateUserUsecase(repo)
+	// DI qua Dependencies per-module — wire 
+	userDeps := userHttp.NewDependencies(dbPool)
+	userHttp.RegisterUserRoutes(r, userDeps.Handler)
 
-	handler := userHttp.NewUserHandler(uc)	
-	// Dùng chung userHttp cho cả Handler và Router
-	userHttp.RegisterUserRoutes(r, handler)
-
-	storage, err := r2storage.NewR2Provider(cfg.R2)
+	storageProvider, err := r2storage.NewR2Provider(cfg.R2)
 	if err != nil {
 		panic(err)
 	}
-	uploadUsecase := uploadUsecase.NewCreateUploadUsecase(storage)
-	uploadHandler := uploadHttp.NewUploadHandler(uploadUsecase)
+	uploadDeps := uploadHttp.NewDependencies(storageProvider)
+	uploadHttp.RegisterUploadRoutes(r, uploadDeps.Handler)
 
-	// Dùng chung uploadHttp cho cả Handler và Router
-	uploadHttp.RegisterUploadRoutes(r, uploadHandler)
+	transactionDeps := transaction.NewDependencies(dbPool)
+	transaction.RegisterTransactionRoutes(r, transactionDeps.Handler)
+	
+	postDeps := postHttp.NewDependencies(dbPool, uploadDeps.Usecase, transactionDeps.Usecase)
+	postHttp.RegisterPostRoutes(r, postDeps.Handler)
 	return r
 }

@@ -50,18 +50,31 @@ func NewR2Provider(cfg config.R2Config) (storage.StorageProvider, error) {
 	}, nil
 }
 
-func (s *r2Storage) Upload(ctx context.Context, key string, data []byte, contentType string) (string, error) {
-	cleanKey := strings.TrimLeft(key, "/") // Xóa dấu / ở đầu key để tránh URL bị dúp //
+func (s *r2Storage) Upload(ctx context.Context, file *storage.File) (string, error) {
+	cleanKey := strings.TrimLeft("/" +file.Key, "/") // Xóa dấu / ở đầu key để tránh URL bị dúp //
 
 	_, err := s.client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket:      aws.String(s.bucket),
 		Key:         aws.String(cleanKey),
-		Body:        bytes.NewReader(data),
-		ContentType: aws.String(contentType),
+		Body:        bytes.NewReader(file.Data),
+		ContentType: aws.String(file.ContentType),
 	})
 	if err != nil {
 		return "", err
 	}
 
 	return fmt.Sprintf("%s/%s", s.pubURL, cleanKey), nil
+}
+
+func (s *r2Storage) Delete(ctx context.Context, fileURL string) error {
+	key := strings.TrimPrefix(fileURL, s.pubURL+"/")
+	key = strings.TrimLeft(key, "/")
+	if key == "" {
+		return errors.New("file key rỗng, không thể xóa")
+	}
+	_, err := s.client.DeleteObject(ctx, &s3.DeleteObjectInput{
+		Bucket: aws.String(s.bucket),
+		Key:    aws.String(key),
+	})
+	return err
 }

@@ -2,7 +2,9 @@ package upload
 
 import (
 	"context"
+	"errors"
 	"spendsnap-backend/internal/domain/storage"
+	"spendsnap-backend/pkg/utils"
 	"spendsnap-backend/pkg/utils/media"
 )
 
@@ -17,7 +19,13 @@ func NewCreateUploadUsecase(storage storage.StorageProvider) *CreateUploadUsecas
 	}
 }
 
-func (uc *CreateUploadUsecase) Upload(ctx context.Context, file *storage.File) (string, error) {
+func (uc *CreateUploadUsecase) ProcessUploadFile(ctx context.Context, file *storage.File) (string, error) {
+	if uc == nil || uc.storage == nil {
+		return "", errors.New("storage provider not initialized")
+	}
+	if file == nil {
+		return "", errors.New("file không được để trống")
+	}
 	err := file.Validate()
 	if err != nil {
 		return "", err
@@ -28,11 +36,22 @@ func (uc *CreateUploadUsecase) Upload(ctx context.Context, file *storage.File) (
 		return "", err
 	}
 
-
+	newImageID := utils.NewID()
+	newKey := "images/" + newImageID + ".webp"
 	fileToUpload := &storage.File{
-		Key:         file.Key,
+		Key:         newKey,
 		ContentType: newContentType,
 		Data:        fileConverted,
 	}
-	return uc.storage.Upload(ctx, fileToUpload.Key, fileToUpload.Data, fileToUpload.ContentType)
+	return uc.storage.Upload(ctx,fileToUpload)
+}
+
+func (uc *CreateUploadUsecase) DeleteFile(ctx context.Context, fileURL string) error {
+	if uc == nil || uc.storage == nil {
+		return errors.New("storage provider not initialized")
+	}
+	if fileURL == "" {
+		return nil
+	}
+	return uc.storage.Delete(ctx, fileURL)
 }

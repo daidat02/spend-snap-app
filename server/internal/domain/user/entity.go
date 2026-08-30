@@ -13,7 +13,7 @@ const (
 
 // thực thể người dùng
 type User struct{
-	Id string
+	ID string
 	Email string
 	Password string
 	Username string

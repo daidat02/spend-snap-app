@@ -1,11 +1,10 @@
 package upload
 
 import (
-	"io"
 	"net/http"
 
-	"spendsnap-backend/internal/domain/storage"
 	usecase "spendsnap-backend/internal/usecase/upload"
+	"spendsnap-backend/pkg/utils/media"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,46 +22,12 @@ func NewUploadHandler(usecase *usecase.CreateUploadUsecase) *UploadHandler {
 }
 
 func (h *UploadHandler) UploadFile(c *gin.Context) {
-	// 1. Nhận file nhị phân trực tiếp từ Form với key là "file"
-	fileHeader, err := c.FormFile("file")
+	fileToUpload, err := media.ExtractFileFromRequest(c, "file")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Vui lòng chọn file để upload"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	// 2. Lấy Content-Type tự động từ File (image/png, image/jpeg...)
-	contentType := fileHeader.Header.Get("Content-Type")
-
-	// 3. Mở luồng đọc file
-	file, err := fileHeader.Open()
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Không thể mở file"})
-		return
-	}
-	defer file.Close()
-
-	// 4. Đọc dữ liệu file thành []byte
-	fileBytes, err := io.ReadAll(file)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Không thể đọc dữ liệu file"})
-		return
-	}
-
-	// 5. Tên file lấy trực tiếp từ file gốc hoặc Param URL
-	filename := "uploads/" + c.Param("filename")
-	if filename == "" {
-		filename = fileHeader.Filename
-	}
-
-	fileToUpload := &storage.File{
-		Key:         filename,
-		ContentType: contentType,
-		Data:        fileBytes,
-	}
-
-
-	// 6. Upload lên R2
-	res, err := h.usecase.Upload(c.Request.Context(), fileToUpload)
+	res, err := h.usecase.ProcessUploadFile(c.Request.Context(), fileToUpload)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -71,9 +36,3 @@ func (h *UploadHandler) UploadFile(c *gin.Context) {
 	c.JSON(http.StatusOK, FileUploadResponse{FileURL: res})
 }
 
-func RegisterUploadRoutes(router *gin.Engine, uploadHandler *UploadHandler) {
-	uploadGroup := router.Group("/api/v1/upload")
-	{
-		uploadGroup.POST("/:filename", uploadHandler.UploadFile)
-	}
-}

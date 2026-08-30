@@ -28,7 +28,7 @@ func(repo *PostgresUserRepository)Create(ctx context.Context,user *userdomain.Us
 	_, err := repo.db.Exec(
 		ctx,
 		queryCreateUser,
-		user.Id,
+		user.ID,
 		user.Email,
 		user.Password,
 		user.Username,
@@ -49,7 +49,7 @@ func (repo *PostgresUserRepository) FindByEmail(ctx context.Context, email strin
 	log.Println("Finding user by email in Postgres repository:", email)
 	u := &userdomain.User{}
 	err := repo.db.QueryRow(ctx, queryGetByEmail, email).Scan(
-		&u.Id,
+		&u.ID,
 		&u.Email,
 		&u.Firstname,
 		&u.Lastname,

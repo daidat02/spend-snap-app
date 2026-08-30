@@ -26,9 +26,14 @@ type File struct {
 }
 
 type StorageProvider interface {
-	Upload(ctx context.Context, key string, data []byte, contentType string) (string, error)
+	Upload(ctx context.Context, file *File) (string, error)
+	Delete(ctx context.Context, fileURL string) error
 }
 
+type UploadUsecase interface {
+    ProcessUploadFile(ctx context.Context, file *File) (string, error)
+    DeleteFile(ctx context.Context, fileURL string) error
+}
 // Validate kiểm tra Key, Dung lượng và Định dạng file
 func (f *File) Validate() error {
 	// 1. Kiểm tra Key

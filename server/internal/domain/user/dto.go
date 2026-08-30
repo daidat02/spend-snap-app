@@ -24,7 +24,7 @@ type LoginRequest struct {
 }
 
 type UserResponse struct {
-    Id          string `json:"id"`
+    ID          string `json:"id"`
     Email       string `json:"email"`
     Username    string `json:"user_name"` // Nếu rỗng thì ẩn
     Firstname   string `json:"first_name,omitempty"`
